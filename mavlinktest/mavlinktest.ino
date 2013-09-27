@@ -68,7 +68,7 @@ void read_mavlink(){
         uint8_t c = Serial1.read();
 
         /* allow CLI to be started by hitting enter 3 times, if no
-        heartbeat packets have been received */
+        heartbeat packets have been received
         if (mavlink_active == 0 && millis() < 20000 && millis() > 5000) {
             if (c == '\n' || c == '\r') {
                 crlf_count++;
@@ -80,7 +80,7 @@ void read_mavlink(){
                 ;
             }
         }
-
+         */
         //trying to grab msg  
         if(mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status)) {
             mavlink_active = 1;

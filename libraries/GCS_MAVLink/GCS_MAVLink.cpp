@@ -11,13 +11,13 @@ License as published by the Free Software Foundation; either
 version 2.1 of the License, or (at your option) any later version.
 */
 
-#include <FastSerial.h>
-#include <AP_Common.h>
+//#include <FastSerial.h>
+//#include <AP_Common.h>
 #include <GCS_MAVLink.h>
 
 
-BetterStream	*mavlink_comm_0_port;
-BetterStream	*mavlink_comm_1_port;
+Stream	*mavlink_comm_0_port;
+Stream	*mavlink_comm_1_port;
 
 mavlink_system_t mavlink_system = {12,1,0,0}; //modified
 
@@ -30,6 +30,7 @@ uint8_t mavlink_check_target(uint8_t sysid, uint8_t compid)
     return 0; // no error
 }
 
+/*
 // return a MAVLink variable type given a AP_Param type
 uint8_t mav_var_type(enum ap_var_type t)
 {
@@ -46,4 +47,4 @@ uint8_t mav_var_type(enum ap_var_type t)
     return MAVLINK_TYPE_FLOAT;
 }
 
-
+*/

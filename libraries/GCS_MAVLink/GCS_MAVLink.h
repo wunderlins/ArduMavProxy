@@ -6,7 +6,10 @@
 #ifndef GCS_MAVLink_h
 #define GCS_MAVLink_h
 
-#include <BetterStream.h>
+#include <Stream.h>
+
+
+//#include <BetterStream.h>
 
 // we have separate helpers disabled to make it possible
 // to select MAVLink 1.0 in the arduino GUI build
@@ -21,10 +24,10 @@
 #include "include/mavlink/v1.0/mavlink_types.h"
 
 /// MAVLink stream used for HIL interaction
-extern BetterStream	*mavlink_comm_0_port;
+extern Stream	*mavlink_comm_0_port;
 
 /// MAVLink stream used for ground control communication
-extern BetterStream	*mavlink_comm_1_port;
+extern Stream	*mavlink_comm_1_port;
 
 /// MAVLink system definition
 extern mavlink_system_t mavlink_system;
@@ -99,10 +102,12 @@ static inline int comm_get_txspace(mavlink_channel_t chan)
 {
     switch(chan) {
 	case MAVLINK_COMM_0:
-		return mavlink_comm_0_port->txspace();
+		// return mavlink_comm_0_port->txspace();
+		return 65535;
 		break;
 	case MAVLINK_COMM_1:
-		return mavlink_comm_1_port->txspace();
+		//return mavlink_comm_1_port->txspace();
+		return 65535;
 		break;
 	default:
 		break;
@@ -116,6 +121,6 @@ static inline int comm_get_txspace(mavlink_channel_t chan)
 uint8_t mavlink_check_target(uint8_t sysid, uint8_t compid);
 
 // return a MAVLink variable type given a AP_Param type
-uint8_t mav_var_type(enum ap_var_type t);
+//uint8_t mav_var_type(enum ap_var_type t);
 
 #endif // GCS_MAVLink_h

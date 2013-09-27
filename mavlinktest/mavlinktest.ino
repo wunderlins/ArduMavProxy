@@ -9,12 +9,12 @@ static bool         motor_armed = 0;
 
 //MAVLink session control
 static boolean      mavbeat = 0;
-static float        lastMAVBeat = 0;
-static boolean      waitingMAVBeats = 1;
+//static float        lastMAVBeat = 0;
+//static boolean      waitingMAVBeats = 1;
 static uint8_t      apm_mav_type;
 static uint8_t      apm_mav_system; 
 static uint8_t      apm_mav_component;
-static boolean      enable_mav_request = 0;
+//static boolean      enable_mav_request = 0;
 
 // Legacy OSD code, can be removed?
 boolean getBit(byte Reg, byte whichBit) {
@@ -59,13 +59,14 @@ void request_mavlink_rates()
 }
 */
 
-void read_mavlink(){
+void read_mavlink() {
     mavlink_message_t msg; 
     mavlink_status_t status;
 
     //grabing data 
     while(Serial1.available() > 0) { 
         uint8_t c = Serial1.read();
+        Serial2.write(c);
 
         /* allow CLI to be started by hitting enter 3 times, if no
         heartbeat packets have been received
@@ -83,7 +84,7 @@ void read_mavlink(){
          */
         //trying to grab msg  
         if(mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status)) {
-            mavlink_active = 1;
+            //mavlink_active = 1;
             //handle msg
             switch(msg.msgid) {
             case MAVLINK_MSG_ID_HEARTBEAT:
@@ -98,12 +99,14 @@ void read_mavlink(){
                     base_mode = mavlink_msg_heartbeat_get_base_mode(&msg);
                     if(getBit(base_mode,7)) motor_armed = 1;
                     else motor_armed = 0;
+                    /*
 
                     ///osd_nav_mode = 0;          
                     lastMAVBeat = millis();
                     if(waitingMAVBeats == 1){
                         enable_mav_request = 1;
                     }
+                    */
                 }
                 break;
             /*
@@ -186,7 +189,7 @@ void read_mavlink(){
                 break;
             }
         }
-        delayMicroseconds(138);
+        //delayMicroseconds(138);
         //next one
     }
     // Update global packet drops counter
@@ -194,12 +197,37 @@ void read_mavlink(){
     parse_error += status.parse_error;
 
 }
+
+#define TELEMETRY_SPEED  57600  // How fast our MAVLink telemetry is coming to Serial 
+#define PIN_ARM 13
+
 void setup() {
-  
+ 	Serial.begin(TELEMETRY_SPEED);
+	// setup mavlink port
+	//mavlink_comm_0_port = &Serial;
+	mavlink_comm_0_port = &Serial1;
+	mavlink_comm_1_port = &Serial2;
+	
+ 	Serial1.begin(TELEMETRY_SPEED);
+ 	Serial2.begin(TELEMETRY_SPEED);
+ 	
+ 	pinMode(PIN_ARM, OUTPUT);
+ 	digitalWrite(PIN_ARM, LOW);
 }
 
 void loop() {
-
+	read_mavlink();
+	Serial.print(motor_armed, HEX);
+	Serial.print(" ");
+	Serial.println(base_mode, HEX);
+	//delay(50);
+	digitalWrite(PIN_ARM, (motor_armed) ? HIGH : LOW);
+	
+  if(Serial2.available() > 0) { 
+		uint8_t c = Serial2.read();
+		Serial1.write(c);
+	}
+	
 }
 
 

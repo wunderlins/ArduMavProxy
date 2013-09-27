@@ -14,9 +14,11 @@
 
 void setup() {
 	Serial.begin(TELEMETRY_SPEED);
-	Serial1.begin(ARDUINO_TELEMETRY_SPEED);
+	//Serial1.begin(ARDUINO_TELEMETRY_SPEED);
+	Serial1.begin(TELEMETRY_SPEED);
 }
 
+int c = 0;
 void loop() {
 	int incomingByte;
   /*      
@@ -30,13 +32,20 @@ void loop() {
 	*/
 	if (Serial1.available() > 0) {
 		incomingByte = Serial1.read();
-		Serial.print("UART received: ");
-		Serial.println(incomingByte, DEC);
+		//Serial.print("UART received: ");
+		Serial.print(incomingByte, HEX);
+		Serial.print(" ");
 //		Serial1.print("UART received:");
 //		Serial1.println(incomingByte, DEC);
+		c++;
+		
+		if (c > 9) {
+			Serial.println();
+			c = 0;
+		}
 	}
 	
-	Serial.println("end loop");
-	delay(1000);
+	//Serial.println("end loop");
+	//delay(1000);
 }
 

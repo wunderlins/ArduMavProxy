@@ -200,19 +200,74 @@ void read_mavlink() {
 
 #define TELEMETRY_SPEED  57600  // How fast our MAVLink telemetry is coming to Serial 
 #define PIN_ARM 13
+#define PIN_AUTO 14
+
+#define MAVLINK_FRAME_LENGTH 263
+
+// sessage structs
+mavlink_message_t msg1;
+mavlink_status_t status1;
+mavlink_message_t msg2;
+mavlink_status_t status2;
+mavlink_message_t msg3;
+mavlink_status_t status3;
+
+// routing message buffers (stram only)
+char buffer1[MAVLINK_FRAME_LENGTH + 1] = "";
+char buffer2[MAVLINK_FRAME_LENGTH + 1] = "";
+char buffer3[MAVLINK_FRAME_LENGTH + 1] = "";
+int buffer1_count = 0;
+int buffer2_count = 0;
+int buffer3_count = 0;
+
+// Serial aliases for better reading in code
+HardwareSerial *ser_src   = &Serial1;
+HardwareSerial *ser_modem = &Serial2;
+HardwareSerial *ser_ext   = &Serial3;
+
+typedef struct comm_src {
+	mavlink_message_t msg = msg1;
+	mavlink_status_t status = status1;
+	char *buffer = buffer1;
+	int *buffer_count = &buffer1_count;
+	HardwareSerial *serial = ser_src;
+} comm_src_t;
+
+typedef struct comm_modem {
+	mavlink_message_t msg = msg2;
+	mavlink_status_t status = status2;
+	char *buffer = buffer2;
+	int *buffer_count = &buffer2_count;
+	HardwareSerial *serial = ser_modem;
+} comm_modem_t;
+
+typedef struct comm_ext {
+	mavlink_message_t msg = msg3;
+	mavlink_status_t status = status3;
+	char *buffer = buffer2;
+	int *buffer_count = &buffer3_count;
+	HardwareSerial *serial = ser_ext;
+} comm_ext_t;
+
+uint8_t mode_auto = 0;
 
 void setup() {
  	Serial.begin(TELEMETRY_SPEED);
+ 	
 	// setup mavlink port
-	//mavlink_comm_0_port = &Serial;
 	mavlink_comm_0_port = &Serial1;
 	mavlink_comm_1_port = &Serial2;
+	//mavlink_comm_2_port = &Serial3;
 	
  	Serial1.begin(TELEMETRY_SPEED);
  	Serial2.begin(TELEMETRY_SPEED);
+ 	//Serial3.begin(TELEMETRY_SPEED);
  	
+ 	// set pins to default state
  	pinMode(PIN_ARM, OUTPUT);
+ 	pinMode(PIN_AUTO, OUTPUT);
  	digitalWrite(PIN_ARM, LOW);
+ 	digitalWrite(PIN_AUTO, LOW);
 }
 
 uint8_t read_packet(mavlink_message_t *msg, 
@@ -232,24 +287,21 @@ uint8_t read_packet(mavlink_message_t *msg,
 	return 0;
 }
 
-// sessage structs
-mavlink_message_t msg1;
-mavlink_status_t status1;
-mavlink_message_t msg2;
-mavlink_status_t status2;
-mavlink_message_t msg3;
-mavlink_status_t status3;
+uint8_t read_packet_new(struct comm_src *comm) {
+	/*
+	//grabing data 
+	while(source->available() > 0) { 
+		uint8_t c = source->read();
+		target->write(c);
 
-// routing message buffers (stram only)
-#define MAVLINK_FRAME_LENGTH 263
-char buffer1[MAVLINK_FRAME_LENGTH + 1] = "";
-char buffer2[MAVLINK_FRAME_LENGTH + 1] = "";
-char buffer3[MAVLINK_FRAME_LENGTH + 1] = "";
-
-// Serial aliases for better reading in code
-HardwareSerial *ser_src   = &Serial1;
-HardwareSerial *ser_modem = &Serial2;
-HardwareSerial *ser_ext   = &Serial3;
+		//trying to grab msg  
+		if(mavlink_parse_char(MAVLINK_COMM_0, c, msg, status)) {
+			return 1;
+		}
+	}
+	*/
+	return 0;
+}
 
 void loop() {
 	//read_mavlink();
@@ -263,17 +315,38 @@ void loop() {
 			apm_mav_component = msg1.compid;
 			apm_mav_type      = mavlink_msg_heartbeat_get_type(&msg1);
 			base_mode = mavlink_msg_heartbeat_get_base_mode(&msg1);
-			if(getBit(base_mode,7)) motor_armed = 1;
-			else motor_armed = 0;
+			
+			// is armed?
+			
+			if(getBit(base_mode, 7)) 
+				motor_armed = 1;
+			else 
+				motor_armed = 0;
+			
+			// is auto ?
+			if(getBit(base_mode, 3)) 
+				mode_auto = 1;
+			else 
+				mode_auto = 0;
 		}
-
-		Serial.print(msg1.msgid, HEX);
+		
+		if (!base_mode)
+			Serial.print("00000000");
+		else
+			Serial.print(base_mode, BIN);
 		Serial.print("\t");
 		Serial.print(motor_armed, HEX);
 		Serial.print("\t");
 		Serial.println(base_mode, HEX);
+		
 		digitalWrite(PIN_ARM, (motor_armed) ? HIGH : LOW);
+		digitalWrite(PIN_AUTO, (mode_auto) ? HIGH : LOW);
+	}
 
+	if (ret2) { // we got a complete message from the source
+		if (msg2.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
+			;
+		}
 	}
 	
 	//delay(50);

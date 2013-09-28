@@ -215,18 +215,75 @@ void setup() {
  	digitalWrite(PIN_ARM, LOW);
 }
 
+uint8_t read_packet(mavlink_message_t *msg, 
+                 mavlink_status_t *status, 
+                 HardwareSerial *source, 
+                 HardwareSerial *target ) {
+	//grabing data 
+	while(source->available() > 0) { 
+		uint8_t c = source->read();
+		target->write(c);
+
+		//trying to grab msg  
+		if(mavlink_parse_char(MAVLINK_COMM_0, c, msg, status)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+// sessage structs
+mavlink_message_t msg1;
+mavlink_status_t status1;
+mavlink_message_t msg2;
+mavlink_status_t status2;
+mavlink_message_t msg3;
+mavlink_status_t status3;
+
+// routing message buffers (stram only)
+#define MAVLINK_FRAME_LENGTH 263
+char buffer1[MAVLINK_FRAME_LENGTH + 1] = "";
+char buffer2[MAVLINK_FRAME_LENGTH + 1] = "";
+char buffer3[MAVLINK_FRAME_LENGTH + 1] = "";
+
+// Serial aliases for better reading in code
+HardwareSerial *ser_src   = &Serial1;
+HardwareSerial *ser_modem = &Serial2;
+HardwareSerial *ser_ext   = &Serial3;
+
 void loop() {
-	read_mavlink();
-	Serial.print(motor_armed, HEX);
-	Serial.print(" ");
-	Serial.println(base_mode, HEX);
-	//delay(50);
-	digitalWrite(PIN_ARM, (motor_armed) ? HIGH : LOW);
+	//read_mavlink();
+	uint8_t ret1 = read_packet(&msg1, &status1, ser_src, ser_modem);
+	uint8_t ret2 = read_packet(&msg2, &status2, ser_modem, ser_src);
 	
+	if (ret1) { // we got a complete message from the source
+		if (msg1.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
+			mavbeat = 1;
+			apm_mav_system    = msg1.sysid;
+			apm_mav_component = msg1.compid;
+			apm_mav_type      = mavlink_msg_heartbeat_get_type(&msg1);
+			base_mode = mavlink_msg_heartbeat_get_base_mode(&msg1);
+			if(getBit(base_mode,7)) motor_armed = 1;
+			else motor_armed = 0;
+		}
+
+		Serial.print(msg1.msgid, HEX);
+		Serial.print("\t");
+		Serial.print(motor_armed, HEX);
+		Serial.print("\t");
+		Serial.println(base_mode, HEX);
+		digitalWrite(PIN_ARM, (motor_armed) ? HIGH : LOW);
+
+	}
+	
+	//delay(50);
+	
+	/*
   if(Serial2.available() > 0) { 
 		uint8_t c = Serial2.read();
 		Serial1.write(c);
 	}
+	*/
 	
 }
 

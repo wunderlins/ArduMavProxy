@@ -12,6 +12,7 @@
 //Will come from APM telem port
 static uint8_t      base_mode=0;
 static bool         motor_armed = 0;
+static uint8_t      mode_auto = 0;
 
 //MAVLink session control
 static boolean      mavbeat = 0;
@@ -47,22 +48,10 @@ static uint8_t gps_satellites_visible = 0;
 typedef struct comm_t {
 	char buffer[MAVLINK_FRAME_LENGTH + 1];
 	int buffer_count;
-	HardwareSerial *serial;
+	Stream *serial;
 	mavlink_message_t msg;
 	mavlink_status_t status;
 	bool has_message;
 	uint8_t chan;
 };
-
-typedef struct comm_usb_t {
-	char buffer[MAVLINK_FRAME_LENGTH + 1];
-	int buffer_count;
-	usb_serial_class *serial;
-	mavlink_message_t msg;
-	mavlink_status_t status;
-	bool has_message;
-	uint8_t chan;
-};
-
-uint8_t mode_auto = 0;
 

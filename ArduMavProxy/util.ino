@@ -16,6 +16,17 @@ byte setBit(byte &Reg, byte whichBit, boolean stat) {
     return Reg;
 }
 
+void flush_packet(comm_t *src) {
+	src->buffer_count = 0;
+	src->buffer[0] = '\0';
+}
+
+void route_packet(comm_t *src, comm_t *target) {
+	for (int i=0; i <= src->buffer_count; i++)
+		target->serial->write(src->buffer[i]);
+	flush_packet(src);
+}
+
 /**
  * read a mavlink packet
  *
@@ -38,8 +49,9 @@ uint8_t read_packet(comm_t *src, comm_t *target, bool passthrough) {
 		// buffer overflow protection
 		if (src->buffer_count == MAVLINK_FRAME_LENGTH) {
 			// flush stream buffer if full
-			src->buffer_count = 0;
-			src->buffer[0] = '\0';
+			//src->buffer_count = 0;
+			//src->buffer[0] = '\0';
+			flush_packet(src);
 		}
 		
 		if (passthrough)

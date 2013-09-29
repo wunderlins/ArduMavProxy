@@ -17,9 +17,9 @@ static HardwareSerial *ser_src   = &Serial1;
 static HardwareSerial *ser_modem = &Serial2;
 static HardwareSerial *ser_ext   = &Serial3;
 
-static comm_t s_src =   {"", 0, &Serial1, msg1, status1, 0};
-static comm_t s_modem = {"", 0, &Serial2, msg2, status2, 0};
-//static comm_t s_ext =   {"", 0, &Serial3, msg3, status3, 0};
+static comm_t s_src =   {"", 0, &Serial1, msg1, status1, 0, 1};
+static comm_t s_modem = {"", 0, &Serial2, msg2, status2, 0, 2};
+//static comm_t s_ext =   {"", 0, &Serial3, msg3, status3, 0, 3};
 
 void setup() {
  	Serial.begin(TELEMETRY_SPEED);
@@ -52,13 +52,21 @@ void loop() {
 	if (ret1) { // we got a complete message from the source
 		
 		// route raw buffer input from src to target
-		//Serial.print("src buffer. ");
-		//Serial.println(s_src.buffer_count);
 		/*
-		s_modem.serial->write(s_src.buffer);
+		Serial.print("modem  ");
+		Serial.print(s_src.buffer_count);
+		Serial.print(", ");
+		*/
+		
+		for (int i=0; i <= s_src.buffer_count; i++) {
+			s_modem.serial->write(s_src.buffer[i]);
+			//Serial.print(s_src.buffer[i]);
+		}
+		//Serial.println();
+		
 		s_src.buffer_count = 0;
 		s_src.buffer[0] = '\0';
-		*/
+
 		
 		// basic MAV information
 		if (s_src.msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
@@ -118,13 +126,21 @@ void loop() {
 
 	uint8_t ret2 = read_packet(&s_modem, &s_src);
 	if (ret2) { // we got a complete message from the source
+		
 		/*
-		Serial.print("modem buffer. ");
-		Serial.println(s_modem.buffer_count);
-		s_src.serial->write(s_modem.buffer);
+		Serial.print("modem  ");
+		Serial.print(s_modem.buffer_count);
+		Serial.print(", ");
+		*/
+		
+		for (int i=0; i <= s_modem.buffer_count; i++) {
+			s_src.serial->write(s_modem.buffer[i]);
+			//Serial.print(s_modem.buffer[i]);
+		}
+		//Serial.println();
+		
 		s_modem.buffer_count = 0;
 		s_modem.buffer[0] = '\0';
-		*/
 		
 		if (s_modem.msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
 			;

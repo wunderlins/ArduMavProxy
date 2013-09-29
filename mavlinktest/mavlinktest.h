@@ -64,6 +64,7 @@ typedef struct comm_t {
 	mavlink_message_t msg;
 	mavlink_status_t status;
 	bool has_message;
+	uint8_t chan;
 };
 
 uint8_t mode_auto = 0;

@@ -52,7 +52,10 @@ uint8_t read_packet(comm_t *src, comm_t *target) {
 		}
 		
 		// FIXME: legace, passthrough
-		target->serial->write(c);
+		/*
+		if (src->chan != 2)
+			target->serial->write(c);
+		*/
 
 		// try to grab message, decode if complete
 		if(mavlink_parse_char(MAVLINK_COMM_0, c, &(src->msg), &(src->status))) {

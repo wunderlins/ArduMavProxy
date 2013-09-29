@@ -2,7 +2,7 @@
 #include "../GCS_MAVLink/include/mavlink/v1.0/ardupilotmega/mavlink.h"
 
 #include <GCS_MAVLink.h>
-#include "mavlinktest.h"
+#include "ArduMavProxy.h"
 
 #define DBG
 

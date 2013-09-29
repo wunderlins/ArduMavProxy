@@ -4,7 +4,9 @@
 #include <GCS_MAVLink.h>
 #include "mavlinktest.h"
 
-// sessage structs
+#define DBG
+
+// message structs
 static mavlink_message_t msg1;
 static mavlink_message_t msg2;
 static mavlink_message_t msg3;
@@ -17,24 +19,15 @@ static HardwareSerial *ser_src   = &Serial1;
 static HardwareSerial *ser_modem = &Serial2;
 static HardwareSerial *ser_ext   = &Serial3;
 
-static comm_t s_src =   {"", 0, &Serial1, msg1, status1, 0, 1};
-static comm_t s_modem = {"", 0, &Serial2, msg2, status2, 0, 2};
-//static comm_t s_ext =   {"", 0, &Serial3, msg3, status3, 0, 3};
+static comm_t s_src     = {"", 0, &Serial1, msg1, status1, 0, 1};
+static comm_t s_modem   = {"", 0, &Serial2, msg2, status2, 0, 2};
+//static comm_usb_t s_ext = {"", 0, &Serial,  msg3, status3, 0, 3};
 
 void setup() {
  	Serial.begin(TELEMETRY_SPEED);
  	Serial1.begin(TELEMETRY_SPEED);
- 	Serial2.begin(TELEMETRY_SPEED);
+ 	Serial2.begin(TELEMETRY_SPEED); // FIXME: s_modem.serial->begin() doesn't work
  	//Serial3.begin(TELEMETRY_SPEED);
- 	
-	// setup mavlink port
-	//mavlink_comm_0_port = s_src.serial;
-	//mavlink_comm_1_port = s_modem.serial;
-
-	//mavlink_comm_0_port = s_src.serial;
-	//mavlink_comm_1_port = s_modem.serial;
-	//mavlink_comm_2_port = &Serial3;
-	
  	
  	// set pins to default state
  	pinMode(PIN_ARM, OUTPUT);
@@ -44,29 +37,16 @@ void setup() {
 }
 
 void loop() {
-	//read_mavlink();
-	//uint8_t ret1 = read_packet_old(&msg1, &status1, ser_src, ser_modem);
-	//uint8_t ret2 = read_packet_old(&msg2, &status2, ser_modem, ser_src);
+	// read mavlink package from apm
 	uint8_t ret1 = read_packet(&s_src, &s_modem);
 	
 	if (ret1) { // we got a complete message from the source
 		
 		// route raw buffer input from src to target
-		/*
-		Serial.print("modem  ");
-		Serial.print(s_src.buffer_count);
-		Serial.print(", ");
-		*/
-		
-		for (int i=0; i <= s_src.buffer_count; i++) {
+		for (int i=0; i <= s_src.buffer_count; i++)
 			s_modem.serial->write(s_src.buffer[i]);
-			//Serial.print(s_src.buffer[i]);
-		}
-		//Serial.println();
-		
 		s_src.buffer_count = 0;
 		s_src.buffer[0] = '\0';
-
 		
 		// basic MAV information
 		if (s_src.msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
@@ -107,37 +87,28 @@ void loop() {
 			gps_fix_type = mavlink_msg_gps_raw_int_get_fix_type(&(s_src.msg));
 			gps_satellites_visible = mavlink_msg_gps_raw_int_get_satellites_visible(&(s_src.msg));
 		}
-
 		
-		/*
-		Serial.print("Sats: ");
-		Serial.print(gps_satellites_visible);
-		Serial.print(", fix: ");
-		Serial.print(gps_fix_type);
-		Serial.print("\t");
-		Serial.print(motor_armed, HEX);
-		Serial.print("\t");
-		Serial.println(base_mode, BIN);
-		*/
+		#ifdef DBG
+			Serial.print("Sats: ");
+			Serial.print(gps_satellites_visible);
+			Serial.print(", fix: ");
+			Serial.print(gps_fix_type);
+			Serial.print("\t");
+			Serial.print(motor_armed, HEX);
+			Serial.print("\t");
+			Serial.println(base_mode, BIN);
+		#endif
 		
 		digitalWrite(PIN_ARM, (motor_armed) ? HIGH : LOW);
 		digitalWrite(PIN_AUTO, (mode_auto) ? HIGH : LOW);
 	}
-
+	
+	// read mavlink package from modem
 	uint8_t ret2 = read_packet(&s_modem, &s_src);
 	if (ret2) { // we got a complete message from the source
 		
-		/*
-		Serial.print("modem  ");
-		Serial.print(s_modem.buffer_count);
-		Serial.print(", ");
-		*/
-		
-		for (int i=0; i <= s_modem.buffer_count; i++) {
+		for (int i=0; i <= s_modem.buffer_count; i++)
 			s_src.serial->write(s_modem.buffer[i]);
-			//Serial.print(s_modem.buffer[i]);
-		}
-		//Serial.println();
 		
 		s_modem.buffer_count = 0;
 		s_modem.buffer[0] = '\0';
@@ -146,6 +117,8 @@ void loop() {
 			;
 		}
 	}
+	
+	
 	
 }
 

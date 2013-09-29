@@ -15,12 +15,9 @@ static bool         motor_armed = 0;
 
 //MAVLink session control
 static boolean      mavbeat = 0;
-//static float        lastMAVBeat = 0;
-//static boolean      waitingMAVBeats = 1;
 static uint8_t      apm_mav_type;
 static uint8_t      apm_mav_system; 
 static uint8_t      apm_mav_component;
-//static boolean      enable_mav_request = 0;
 
 // true when we have received at least 1 MAVLink packet
 static bool mavlink_active;
@@ -47,20 +44,20 @@ static uint8_t gps_satellites_visible = 0;
 #define PIN_AUTO 14
 #define MAVLINK_FRAME_LENGTH 263
 
-// routing message buffers (stram only)
-/*
-char buffer1[MAVLINK_FRAME_LENGTH + 1] = "";
-char buffer2[MAVLINK_FRAME_LENGTH + 1] = "";
-char buffer3[MAVLINK_FRAME_LENGTH + 1] = "";
-int buffer1_count = 0;
-int buffer2_count = 0;
-int buffer3_count = 0;
-*/
-
 typedef struct comm_t {
 	char buffer[MAVLINK_FRAME_LENGTH + 1];
 	int buffer_count;
 	HardwareSerial *serial;
+	mavlink_message_t msg;
+	mavlink_status_t status;
+	bool has_message;
+	uint8_t chan;
+};
+
+typedef struct comm_usb_t {
+	char buffer[MAVLINK_FRAME_LENGTH + 1];
+	int buffer_count;
+	usb_serial_class *serial;
 	mavlink_message_t msg;
 	mavlink_status_t status;
 	bool has_message;

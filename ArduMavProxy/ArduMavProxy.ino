@@ -14,11 +14,7 @@ static mavlink_status_t status1;
 static mavlink_status_t status2;
 static mavlink_status_t status3;
 
-// Serial aliases for better reading in code
-static HardwareSerial *ser_src   = &Serial1;
-static HardwareSerial *ser_modem = &Serial2;
-static HardwareSerial *ser_ext   = &Serial3;
-
+// Serial devices
 static comm_t s_src     = {"", 0, &Serial1, msg1, status1, 0, 1};
 static comm_t s_modem   = {"", 0, &Serial2, msg2, status2, 0, 2};
 //static comm_usb_t s_ext = {"", 0, &Serial,  msg3, status3, 0, 3};
@@ -38,15 +34,17 @@ void setup() {
 
 void loop() {
 	// read mavlink package from apm
-	uint8_t ret1 = read_packet(&s_src, &s_modem);
+	uint8_t ret1 = read_packet(&s_src, &s_modem, true);
 	
 	if (ret1) { // we got a complete message from the source
 		
 		// route raw buffer input from src to target
+		/*
 		for (int i=0; i <= s_src.buffer_count; i++)
 			s_modem.serial->write(s_src.buffer[i]);
 		s_src.buffer_count = 0;
 		s_src.buffer[0] = '\0';
+		*/
 		
 		// basic MAV information
 		if (s_src.msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
@@ -104,7 +102,7 @@ void loop() {
 	}
 	
 	// read mavlink package from modem
-	uint8_t ret2 = read_packet(&s_modem, &s_src);
+	uint8_t ret2 = read_packet(&s_modem, &s_src, false);
 	if (ret2) { // we got a complete message from the source
 		
 		for (int i=0; i <= s_modem.buffer_count; i++)

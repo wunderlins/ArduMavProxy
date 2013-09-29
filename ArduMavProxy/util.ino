@@ -34,7 +34,7 @@ uint8_t read_packet_old(mavlink_message_t *msg,
 }
 */
 
-uint8_t read_packet(comm_t *src, comm_t *target) {
+uint8_t read_packet(comm_t *src, comm_t *target, bool passthrough) {
 	//grabing data 
 	while(src->serial->available() > 0) { 
 		src->has_message = false;
@@ -51,11 +51,8 @@ uint8_t read_packet(comm_t *src, comm_t *target) {
 			src->buffer[0] = '\0';
 		}
 		
-		// FIXME: legace, passthrough
-		/*
-		if (src->chan != 2)
+		if (passthrough)
 			target->serial->write(c);
-		*/
 
 		// try to grab message, decode if complete
 		if(mavlink_parse_char(MAVLINK_COMM_0, c, &(src->msg), &(src->status))) {

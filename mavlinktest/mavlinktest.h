@@ -47,26 +47,15 @@ static uint8_t gps_satellites_visible = 0;
 #define PIN_AUTO 14
 #define MAVLINK_FRAME_LENGTH 263
 
-// sessage structs
-mavlink_message_t msg1;
-mavlink_status_t status1;
-mavlink_message_t msg2;
-mavlink_status_t status2;
-mavlink_message_t msg3;
-mavlink_status_t status3;
-
 // routing message buffers (stram only)
+/*
 char buffer1[MAVLINK_FRAME_LENGTH + 1] = "";
 char buffer2[MAVLINK_FRAME_LENGTH + 1] = "";
 char buffer3[MAVLINK_FRAME_LENGTH + 1] = "";
 int buffer1_count = 0;
 int buffer2_count = 0;
 int buffer3_count = 0;
-
-// Serial aliases for better reading in code
-HardwareSerial *ser_src   = &Serial1;
-HardwareSerial *ser_modem = &Serial2;
-HardwareSerial *ser_ext   = &Serial3;
+*/
 
 typedef struct comm_t {
 	char buffer[MAVLINK_FRAME_LENGTH + 1];
@@ -74,11 +63,8 @@ typedef struct comm_t {
 	HardwareSerial *serial;
 	mavlink_message_t msg;
 	mavlink_status_t status;
+	bool has_message;
 };
-
-static comm_t s_src =   {"", 0, &Serial1, msg1, status1};
-static comm_t s_modem = {"", 0, &Serial2, msg2, status2};
-static comm_t s_ext =   {"", 0, &Serial3, msg3, status3};
 
 uint8_t mode_auto = 0;
 

@@ -15,7 +15,7 @@ byte setBit(byte &Reg, byte whichBit, boolean stat) {
     }
     return Reg;
 }
-
+/*
 uint8_t read_packet_old(mavlink_message_t *msg, 
                  mavlink_status_t *status, 
                  HardwareSerial *source, 
@@ -32,15 +32,31 @@ uint8_t read_packet_old(mavlink_message_t *msg,
 	}
 	return 0;
 }
+*/
 
 uint8_t read_packet(comm_t *src, comm_t *target) {
 	//grabing data 
 	while(src->serial->available() > 0) { 
-		uint8_t c = src->serial->read();
+		src->has_message = false;
+		char c = src->serial->read();
+		
+		// buffer the received character
+		src->buffer[src->buffer_count] = c;
+		(src->buffer_count)++;
+		
+		// buffer overflow protection
+		if (src->buffer_count == MAVLINK_FRAME_LENGTH) {
+			// flush stream buffer if full
+			src->buffer_count = 0;
+			src->buffer[0] = '\0';
+		}
+		
+		// FIXME: legace, passthrough
 		target->serial->write(c);
 
-		//trying to grab msg  
+		// try to grab message, decode if complete
 		if(mavlink_parse_char(MAVLINK_COMM_0, c, &(src->msg), &(src->status))) {
+			src->has_message = true;
 			return 1;
 		}
 	}

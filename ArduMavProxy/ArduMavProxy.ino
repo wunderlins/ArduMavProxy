@@ -47,6 +47,7 @@ void loop() {
 		s_src.buffer[0] = '\0';
 		*/
 		route_packet(&s_src, &s_modem);
+		flush_packet(&s_src);
 		
 		// basic MAV information
 		if (s_src.msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
@@ -108,16 +109,20 @@ void loop() {
 	// read mavlink package from modem
 	uint8_t ret2 = read_packet(&s_modem, &s_src, true);
 	if (ret2) { // we got a complete message from the source
-		
+		/*
 		for (int i=0; i <= s_modem.buffer_count; i++)
 			s_src.serial->write(s_modem.buffer[i]);
+		*/
 		
 		route_packet(&s_modem, &s_ext);
+		route_packet(&s_modem, &s_src);
+		flush_packet(&s_modem);
 	}
 	
 	uint8_t ret3 = read_packet(&s_ext, &s_modem, false);
 	if (ret2) { // we got a complete message from the source
 		route_packet(&s_ext, &s_modem);
+		flush_packet(&s_ext);
 	}
 }
 

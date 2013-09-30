@@ -24,7 +24,7 @@ void flush_packet(comm_t *src) {
 void route_packet(comm_t *src, comm_t *target) {
 	for (int i=0; i <= src->buffer_count; i++)
 		target->serial->write(src->buffer[i]);
-	flush_packet(src);
+	//flush_packet(src);
 }
 
 /**

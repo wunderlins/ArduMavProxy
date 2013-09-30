@@ -118,13 +118,13 @@ void loop() {
 		flush_packet(&s_modem);
 	}
 	
-	
+	#ifndef DBG
 	// No passthrough to modem so we queue src packages
 	uint8_t ret3 = read_packet(&s_ext, &s_modem, false);
 	if (ret2) { // we got a complete message from the source
 		route_packet(&s_ext, &s_modem);
 		flush_packet(&s_ext);
 	}
+	#endif
 }
-
 

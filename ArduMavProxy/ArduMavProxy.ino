@@ -112,7 +112,7 @@ void loop() {
 		*/
 		
 		route_packet(&s_modem, &s_ext);
-		route_packet(&s_modem, &s_src);
+		//route_packet(&s_modem, &s_src);
 		flush_packet(&s_modem);
 	}
 	

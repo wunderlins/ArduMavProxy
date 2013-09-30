@@ -35,7 +35,7 @@ void setup() {
 void loop() {
 	
 	// read mavlink package from apm
-	uint8_t ret1 = read_packet(&s_src, &s_modem, true);
+	uint8_t ret1 = read_packet(&s_src, &s_modem, false);
 	
 	if (ret1) { // we got a complete message from the source
 		
@@ -115,7 +115,10 @@ void loop() {
 		route_packet(&s_modem, &s_ext);
 	}
 	
-	uint8_t ret3 = read_packet(&s_ext, &s_modem, true);
+	uint8_t ret3 = read_packet(&s_ext, &s_modem, false);
+	if (ret2) { // we got a complete message from the source
+		route_packet(&s_ext, &s_modem);
+	}
 }
 
 

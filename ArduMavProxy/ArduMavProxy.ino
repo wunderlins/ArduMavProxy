@@ -33,8 +33,9 @@ void setup() {
 }
 
 void loop() {
+	
 	// read mavlink package from apm
-	uint8_t ret1 = read_packet(&s_src, &s_modem, false);
+	uint8_t ret1 = read_packet(&s_src, &s_modem, true);
 	
 	if (ret1) { // we got a complete message from the source
 		
@@ -69,6 +70,7 @@ void loop() {
 				mode_auto = 0;
 		}
 		
+		/*
 		// system inormation
 		if (s_src.msg.msgid == MAVLINK_MSG_ID_SYS_STATUS) {
 			apm_mav_sensor_present = mavlink_msg_sys_status_get_onboard_control_sensors_present(&(s_src.msg));
@@ -86,6 +88,7 @@ void loop() {
 			gps_fix_type = mavlink_msg_gps_raw_int_get_fix_type(&(s_src.msg));
 			gps_satellites_visible = mavlink_msg_gps_raw_int_get_satellites_visible(&(s_src.msg));
 		}
+		*/
 		
 		#ifdef DBG
 			Serial.print("Sats: ");
@@ -103,21 +106,13 @@ void loop() {
 	}
 	
 	// read mavlink package from modem
-	uint8_t ret2 = read_packet(&s_modem, &s_src, false);
+	uint8_t ret2 = read_packet(&s_modem, &s_src, true);
 	if (ret2) { // we got a complete message from the source
-		/*
+		
 		for (int i=0; i <= s_modem.buffer_count; i++)
 			s_src.serial->write(s_modem.buffer[i]);
 		
-		s_modem.buffer_count = 0;
-		s_modem.buffer[0] = '\0';
-		*/
-		route_packet(&s_modem, &s_src);
-
-		
-		if (s_modem.msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
-			;
-		}
+		route_packet(&s_modem, &s_ext);
 	}
 	
 	uint8_t ret3 = read_packet(&s_ext, &s_modem, true);

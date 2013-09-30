@@ -37,9 +37,16 @@ void route_packet(comm_t *src, comm_t *target) {
  *
  */
 uint8_t read_packet(comm_t *src, comm_t *target, bool passthrough) {
+	
 	//grabing data 
 	while(src->serial->available() > 0) { 
-		src->has_message = false;
+		
+		// the packet should have been used, flush it to prevent buffer overflows
+		if (src->has_message) {
+			src->has_message = false;
+			flush_packet(src);
+		}
+		
 		char c = src->serial->read();
 		
 		// buffer the received character
@@ -63,6 +70,7 @@ uint8_t read_packet(comm_t *src, comm_t *target, bool passthrough) {
 			return 1;
 		}
 	}
+	
 	return 0;
 }
 

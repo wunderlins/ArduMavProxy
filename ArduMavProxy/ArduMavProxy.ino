@@ -31,7 +31,7 @@ void setup() {
 
 void loop() {
 	
-	// read mavlink package from apm
+	// No passthrough to modem so we queue src packages
 	uint8_t ret1 = read_packet(&s_src, &s_modem, false);
 	
 	if (ret1) { // we got a complete message from the source
@@ -47,6 +47,7 @@ void loop() {
 		flush_packet(&s_src);
 		
 		// basic MAV information
+		/*
 		if (s_src.msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
 			mavbeat = 1;
 			apm_mav_system    = s_src.msg.sysid;
@@ -67,6 +68,7 @@ void loop() {
 			else 
 				mode_auto = 0;
 		}
+		*/
 		
 		/*
 		// system inormation
@@ -116,6 +118,8 @@ void loop() {
 		flush_packet(&s_modem);
 	}
 	
+	
+	// No passthrough to modem so we queue src packages
 	uint8_t ret3 = read_packet(&s_ext, &s_modem, false);
 	if (ret2) { // we got a complete message from the source
 		route_packet(&s_ext, &s_modem);

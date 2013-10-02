@@ -34,6 +34,7 @@ void loop() {
 	// No passthrough to modem so we queue src packages
 	uint8_t ret1 = read_packet(&s_src, &s_modem, false);
 	
+	// TODO: check for comm_t.has_packet
 	if (ret1) { // we got a complete message from the source
 		
 		// route raw buffer input from src to target
@@ -113,6 +114,7 @@ void loop() {
 			s_src.serial->write(s_modem.buffer[i]);
 		*/
 		
+		// TODO: implement fast passthrough for 2 channels
 		route_packet(&s_modem, &s_ext);
 		//route_packet(&s_modem, &s_src);
 		flush_packet(&s_modem);

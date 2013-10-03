@@ -16,7 +16,6 @@ void request_mavlink_rates()
             MAVStreams[i], MAVRates[i], 1);
     }
 }
-*/
 
 void read_mavlink() {
     mavlink_message_t msg; 
@@ -27,7 +26,7 @@ void read_mavlink() {
         uint8_t c = Serial1.read();
         Serial2.write(c);
 
-        /* allow CLI to be started by hitting enter 3 times, if no
+        allow CLI to be started by hitting enter 3 times, if no
         heartbeat packets have been received
         if (mavlink_active == 0 && millis() < 20000 && millis() > 5000) {
             if (c == '\n' || c == '\r') {
@@ -40,7 +39,7 @@ void read_mavlink() {
                 ;
             }
         }
-         */
+        
         //trying to grab msg  
         if(mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status)) {
             //mavlink_active = 1;
@@ -58,17 +57,16 @@ void read_mavlink() {
                     base_mode = mavlink_msg_heartbeat_get_base_mode(&msg);
                     if(getBit(base_mode,7)) motor_armed = 1;
                     else motor_armed = 0;
-                    /*
 
                     ///osd_nav_mode = 0;          
                     lastMAVBeat = millis();
                     if(waitingMAVBeats == 1){
                         enable_mav_request = 1;
                     }
-                    */
+                    
                 }
                 break;
-            /*
+            
             case MAVLINK_MSG_ID_SYS_STATUS:
                 {
 
@@ -142,7 +140,7 @@ void read_mavlink() {
                     osd_windspeedz = mavlink_msg_wind_get_speed_z(&msg); //m/s
                 }
                 break;
-            */
+            
             default:
                 //Do nothing
                 break;
@@ -156,3 +154,5 @@ void read_mavlink() {
     parse_error += status.parse_error;
 
 }
+*/
+

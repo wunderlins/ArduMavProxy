@@ -36,60 +36,8 @@ void loop() {
 	
 	// TODO: check for comm_t.has_packet
 	if (ret1) { // we got a complete message from the source
-		
-		// route raw buffer input from src to target
-		/*
-		for (int i=0; i <= s_src.buffer_count; i++)
-			s_modem.serial->write(s_src.buffer[i]);
-		s_src.buffer_count = 0;
-		s_src.buffer[0] = '\0';
-		*/
 		route_packet(&s_src, &s_modem);
 		flush_packet(&s_src);
-		
-		// basic MAV information
-		/*
-		if (s_src.msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
-			mavbeat = 1;
-			apm_mav_system    = s_src.msg.sysid;
-			apm_mav_component = s_src.msg.compid;
-			apm_mav_type      = mavlink_msg_heartbeat_get_type(&(s_src.msg));
-			base_mode = mavlink_msg_heartbeat_get_base_mode(&(s_src.msg));
-			
-			// is armed?
-			
-			if(getBit(base_mode, 7)) 
-				motor_armed = 1;
-			else 
-				motor_armed = 0;
-			
-			// is auto ?
-			if(getBit(base_mode, 3)) 
-				mode_auto = 1;
-			else 
-				mode_auto = 0;
-		}
-		*/
-		
-		/*
-		// system inormation
-		if (s_src.msg.msgid == MAVLINK_MSG_ID_SYS_STATUS) {
-			apm_mav_sensor_present = mavlink_msg_sys_status_get_onboard_control_sensors_present(&(s_src.msg));
-			apm_mav_sensor_enabled = mavlink_msg_sys_status_get_onboard_control_sensors_enabled(&(s_src.msg));
-			apm_mav_sensor_health  = mavlink_msg_sys_status_get_onboard_control_sensors_health(&(s_src.msg));
-		}
-		
-		if (s_src.msg.msgid == MAVLINK_MSG_ID_GPS_RAW_INT) {
-			gps_alt = mavlink_msg_gps_raw_int_get_alt(&(s_src.msg));
-			gps_vel = mavlink_msg_gps_raw_int_get_vel(&(s_src.msg));
-			gps_cog = mavlink_msg_gps_raw_int_get_cog(&(s_src.msg));
-			gps_time = mavlink_msg_gps_raw_int_get_time_usec(&(s_src.msg));
-			gps_lat = mavlink_msg_gps_raw_int_get_lat(&(s_src.msg)) / 10000000.0f;
-			gps_lon = mavlink_msg_gps_raw_int_get_lon(&(s_src.msg)) / 10000000.0f;
-			gps_fix_type = mavlink_msg_gps_raw_int_get_fix_type(&(s_src.msg));
-			gps_satellites_visible = mavlink_msg_gps_raw_int_get_satellites_visible(&(s_src.msg));
-		}
-		*/
 		
 		#ifdef DBG
 			Serial.print("Sats: ");
@@ -109,14 +57,8 @@ void loop() {
 	// read mavlink package from modem
 	uint8_t ret2 = read_packet(&s_modem, &s_src, true);
 	if (ret2) { // we got a complete message from the source
-		/*
-		for (int i=0; i <= s_modem.buffer_count; i++)
-			s_src.serial->write(s_modem.buffer[i]);
-		*/
-		
 		// TODO: implement fast passthrough for 2 channels
 		route_packet(&s_modem, &s_ext);
-		//route_packet(&s_modem, &s_src);
 		flush_packet(&s_modem);
 	}
 	

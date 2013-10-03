@@ -1,26 +1,36 @@
+// utility methods
 
-// Legacy OSD code, can be removed?
+// bit juggling
 boolean getBit(byte Reg, byte whichBit) {
-    boolean State;
-    State = Reg & (1 << whichBit);
-    return State;
+	boolean State;
+	State = Reg & (1 << whichBit);
+	return State;
 }
 
 byte setBit(byte &Reg, byte whichBit, boolean stat) {
-    if (stat) {
-        Reg = Reg | (1 << whichBit);
-    } 
-    else {
-        Reg = Reg & ~(1 << whichBit);
-    }
-    return Reg;
+	if (stat)
+		Reg = Reg | (1 << whichBit);
+	else
+		Reg = Reg & ~(1 << whichBit);
+	return Reg;
 }
 
+/**
+ * flush input buffer
+ *
+ * the user must make sure that the buffered packet was used before flusing.
+ */
 void flush_packet(comm_t *src) {
 	src->buffer_count = 0;
 	src->buffer[0] = '\0';
 }
 
+/**
+ * write buffer to serial
+ * 
+ * writes a buffer and decoded incoming mavlink serial packet to another 
+ * serial port.
+ */
 void route_packet(comm_t *src, comm_t *target) {
 	for (int i=0; i <= src->buffer_count; i++)
 		target->serial->write(src->buffer[i]);
@@ -33,8 +43,7 @@ void route_packet(comm_t *src, comm_t *target) {
  * returns 1 if we got a complete packet. returns 0 if we need to read 
  * more into the stream.
  * 
- * passthrough is for minimal latency. Best used when only sniffing
- *
+ * passthrough is for minimal latency. Best used for sniffing or routing only.
  */
 uint8_t read_packet(comm_t *src, comm_t *target, bool passthrough) {
 	

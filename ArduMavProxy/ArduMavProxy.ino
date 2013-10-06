@@ -1,7 +1,7 @@
 #include <GCS_MAVLink.h>
 #include "ArduMavProxy.h"
 
-// #define DBG
+#define DBG
 
 // message structs
 static mavlink_message_t msg1;
@@ -40,11 +40,11 @@ void loop() {
 		flush_packet(&s_src);
 		
 		#ifdef DBG
-			Serial.print("Sats: ");
-			Serial.print(gps_satellites_visible);
-			Serial.print(", fix: ");
-			Serial.print(gps_fix_type);
-			Serial.print("\t");
+			// Serial.print("Sats: ");
+			// Serial.print(gps_satellites_visible);
+			// Serial.print(", fix: ");
+			// Serial.print(gps_fix_type);
+			// Serial.print("\t");
 			Serial.print(motor_armed, HEX);
 			Serial.print("\t");
 			Serial.println(base_mode, BIN);
@@ -58,7 +58,9 @@ void loop() {
 	uint8_t ret2 = read_packet(&s_modem, &s_src, true);
 	if (ret2) { // we got a complete message from the source
 		// TODO: implement fast passthrough for 2 channels
+		#ifndef DBG
 		route_packet(&s_modem, &s_ext);
+		#endif
 		flush_packet(&s_modem);
 	}
 	

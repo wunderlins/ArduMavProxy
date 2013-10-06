@@ -12,9 +12,9 @@ static mavlink_status_t status2;
 static mavlink_status_t status3;
 
 // Serial devices
-static comm_t s_src     = {"", 0, &Serial1, msg1, status1, 0, 1};
-static comm_t s_modem   = {"", 0, &Serial2, msg2, status2, 0, 2};
-static comm_t s_ext = {"", 0, &Serial,  msg3, status3, 0, 3};
+static comm_t s_src     = {"", 0, &Serial1, msg1, status1, 0, 1, 0, 0};
+static comm_t s_modem   = {"", 0, &Serial2, msg2, status2, 0, 2, 0, 0};
+static comm_t s_ext = {"", 0, &Serial,  msg3, status3, 0, 3, 0, 0};
 
 /**
  * User setup hook
@@ -40,11 +40,12 @@ void on_setup() {
  * if you want to alter a packet before it is sent out to antoher 
  * serial link.
  */
-uint8_t base_mode, motor_armed, mode_auto = 0;
+uint8_t base_mode, motor_armed, mode_auto, mission_current = 0;
+//static uint32_t num_packets = 0;
 void on_serial1(comm_t *message) {
 	
 	if (message->msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
-		base_mode = mavlink_msg_heartbeat_get_base_mode(&(s_src.msg));	
+		base_mode = mavlink_msg_heartbeat_get_base_mode(&(s_src.msg));
 	
 		// is armed?
 		if(getBit(base_mode, 7)) 
@@ -60,6 +61,23 @@ void on_serial1(comm_t *message) {
 	
 		digitalWrite(PIN_ARM, (motor_armed) ? HIGH : LOW);
 		digitalWrite(PIN_AUTO, (mode_auto) ? HIGH : LOW);
+	}
+	
+	if (message->msg.msgid == MAVLINK_MSG_ID_MISSION_CURRENT) {
+		mission_current = (uint8_t) mavlink_msg_mission_current_get_seq(&(s_src.msg));
+		/*
+		Serial.print("WP no: ");
+		Serial.print(mission_current);
+		Serial.print(" num pkg: ");
+		Serial.print(num_packets);
+		Serial.print(" rx: ");
+		Serial.print(message->rx);
+		Serial.print(" tx: ");
+		Serial.print(message->tx);
+		Serial.print(" droped: ");
+		int32_t dropped = message->rx - message->tx;
+		Serial.println(dropped);
+		*/
 	}
 	
 }
@@ -102,11 +120,12 @@ void loop() {
 	passthrough = false;
 	uint8_t ret1 = read_packet(&s_src, &s_modem, passthrough);
 	
-	if (s_src.has_message == true) { // we got a complete message from the source
+	if (s_src.has_message) { // we got a complete message from the source
 		
 		on_serial1(&s_src);
 		
 		if (passthrough == false) {
+			//num_packets++;
 			route_packet(&s_src, &s_modem);
 			flush_packet(&s_src);
 		}
@@ -130,7 +149,7 @@ void loop() {
 	
 	#ifndef DBG
 	// No passthrough to modem so we queue src packages
-	passthrough = true;
+	passthrough = false;
 	uint8_t ret3 = read_packet(&s_ext, &s_modem, passthrough);
 	if (s_ext.has_message) { // we got a complete message from the source
 		

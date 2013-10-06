@@ -37,8 +37,11 @@ void flush_packet(comm_t *src) {
  * serial port.
  */
 void route_packet(comm_t *src, comm_t *target) {
-	for (int i=0; i <= src->buffer_count; i++)
+	int i=0;
+	for (i=0; i < src->buffer_count; i++) {
 		target->serial->write(src->buffer[i]);
+	}
+	src->tx += i;
 	//flush_packet(src);
 }
 
@@ -62,11 +65,14 @@ uint8_t read_packet(comm_t *src, comm_t *target, bool passthrough) {
 	while(src->serial->available() > 0) { 
 		
 		char c = src->serial->read();
+		(src->rx)++;
 		
 		// fast passthough for low latency. If you use this you cant modify 
 		// packages before sending. this is for packet sniffing only.
-		if (passthrough)
+		if (passthrough) {
 			target->serial->write(c);
+			(src->tx)++;
+		}
 
 		// buffer the received character
 		src->buffer[src->buffer_count] = c;

@@ -1,7 +1,7 @@
 #include <GCS_MAVLink.h>
 #include "ArduMavProxy.h"
 
-#define DBG
+// #define DBG
 
 // message structs
 static mavlink_message_t msg1;

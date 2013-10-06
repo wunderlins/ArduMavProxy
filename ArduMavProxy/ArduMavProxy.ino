@@ -16,60 +16,130 @@ static comm_t s_src     = {"", 0, &Serial1, msg1, status1, 0, 1};
 static comm_t s_modem   = {"", 0, &Serial2, msg2, status2, 0, 2};
 static comm_t s_ext = {"", 0, &Serial,  msg3, status3, 0, 3};
 
-void setup() {
- 	Serial.begin(TELEMETRY_SPEED);
- 	Serial1.begin(TELEMETRY_SPEED);
- 	Serial2.begin(TELEMETRY_SPEED); // FIXME: s_modem.serial->begin() doesn't work
- 	//Serial3.begin(TELEMETRY_SPEED);
- 	
- 	// set pins to default state
+/**
+ * User setup hook
+ *
+ * This method is called fro mthe setup function, there shouldn't be a need to 
+ * change the setup, do it here.
+ */
+void on_setup() {
+	#define PIN_ARM 13
+	#define PIN_AUTO 14
+	
  	pinMode(PIN_ARM, OUTPUT);
  	pinMode(PIN_AUTO, OUTPUT);
  	digitalWrite(PIN_ARM, LOW);
  	digitalWrite(PIN_AUTO, LOW);
 }
 
-void loop() {
+/**
+ * user functions for serial 1
+ * 
+ * Add your hooks here. No need to change the main loop if you just want to 
+ * sniff or manipulate a message. You may not use passthrough in the main loop 
+ * if you want to alter a packet before it is sent out to antoher 
+ * serial link.
+ */
+uint8_t base_mode, motor_armed, mode_auto = 0;
+void on_serial1(comm_t *message) {
 	
-	// No passthrough to modem so we queue src packages
-	uint8_t ret1 = read_packet(&s_src, &s_modem, false);
+	if (message->msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
+		base_mode = mavlink_msg_heartbeat_get_base_mode(&(s_src.msg));	
 	
-	// TODO: check for comm_t.has_packet
-	if (ret1) { // we got a complete message from the source
-		route_packet(&s_src, &s_modem);
-		flush_packet(&s_src);
-		
-		#ifdef DBG
-			// Serial.print("Sats: ");
-			// Serial.print(gps_satellites_visible);
-			// Serial.print(", fix: ");
-			// Serial.print(gps_fix_type);
-			// Serial.print("\t");
-			Serial.print(motor_armed, HEX);
-			Serial.print("\t");
-			Serial.println(base_mode, BIN);
-		#endif
-		
+		// is armed?
+		if(getBit(base_mode, 7)) 
+			motor_armed = 1;
+		else 
+			motor_armed = 0;
+
+		// is auto ?
+		if(getBit(base_mode, 3)) 
+			mode_auto = 1;
+		else 
+			mode_auto = 0;
+	
 		digitalWrite(PIN_ARM, (motor_armed) ? HIGH : LOW);
 		digitalWrite(PIN_AUTO, (mode_auto) ? HIGH : LOW);
 	}
 	
+}
+
+/**
+ * user functions for serial 2
+ * 
+ * Add your hooks here. No need to change the main loop if you just want to 
+ * sniff or manipulate a message. You may not use passthrough in the main loop 
+ * if you want to alter a packet before it is sent out to antoher 
+ * serial link.
+ */
+void on_serial2(comm_t *message) {
+	// do something usefull
+}
+
+/**
+ * user functions for serial usb
+ * 
+ * Add your hooks here. No need to change the main loop if you just want to 
+ * sniff or manipulate a message. You may not use passthrough in the main loop 
+ * if you want to alter a packet before it is sent out to antoher 
+ * serial link.
+ */
+void on_serial(comm_t *message) {
+	// do something usefull
+}
+
+void setup() {
+ 	Serial.begin(TELEMETRY_SPEED);
+ 	Serial1.begin(TELEMETRY_SPEED);
+ 	Serial2.begin(TELEMETRY_SPEED); // FIXME: s_modem.serial->begin() doesn't work
+ 	
+ 	on_setup();
+}
+
+void loop() {
+	
+	// No passthrough to modem so we queue src packages
+	passthrough = false;
+	uint8_t ret1 = read_packet(&s_src, &s_modem, passthrough);
+	
+	if (s_src.has_message == true) { // we got a complete message from the source
+		
+		on_serial1(&s_src);
+		
+		if (passthrough == false) {
+			route_packet(&s_src, &s_modem);
+			flush_packet(&s_src);
+		}
+	}
+	
 	// read mavlink package from modem
-	uint8_t ret2 = read_packet(&s_modem, &s_src, true);
-	if (ret2) { // we got a complete message from the source
+	passthrough = false;
+	uint8_t ret2 = read_packet(&s_modem, &s_src, passthrough);
+	if (s_modem.has_message) { // we got a complete message from the source
 		// TODO: implement fast passthrough for 2 channels
-		#ifndef DBG
-		route_packet(&s_modem, &s_ext);
-		#endif
-		flush_packet(&s_modem);
+		on_serial2(&s_modem);
+		
+		if (passthrough == false) {
+			route_packet(&s_modem, &s_src);
+			#ifndef DBG
+			route_packet(&s_modem, &s_ext);
+			#endif
+			flush_packet(&s_modem);
+		}
 	}
 	
 	#ifndef DBG
 	// No passthrough to modem so we queue src packages
-	uint8_t ret3 = read_packet(&s_ext, &s_modem, false);
-	if (ret2) { // we got a complete message from the source
-		route_packet(&s_ext, &s_modem);
-		flush_packet(&s_ext);
+	passthrough = true;
+	uint8_t ret3 = read_packet(&s_ext, &s_modem, passthrough);
+	if (s_ext.has_message) { // we got a complete message from the source
+		
+		on_serial(&s_ext);
+		
+		if (passthrough == false) {
+			route_packet(&s_ext, &s_modem);
+			flush_packet(&s_ext);
+		}
 	}
 	#endif
 }

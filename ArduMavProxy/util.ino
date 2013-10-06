@@ -52,17 +52,22 @@ void route_packet(comm_t *src, comm_t *target) {
  */
 uint8_t read_packet(comm_t *src, comm_t *target, bool passthrough) {
 	
+	// the packet should have been used, flush it to prevent buffer overflows
+	if (src->has_message) {
+		src->has_message = false;
+		flush_packet(src);
+	}
+		
 	//grabing data 
 	while(src->serial->available() > 0) { 
 		
-		// the packet should have been used, flush it to prevent buffer overflows
-		if (src->has_message) {
-			src->has_message = false;
-			flush_packet(src);
-		}
-		
 		char c = src->serial->read();
 		
+		// fast passthough for low latency. If you use this you cant modify 
+		// packages before sending. this is for packet sniffing only.
+		if (passthrough)
+			target->serial->write(c);
+
 		// buffer the received character
 		src->buffer[src->buffer_count] = c;
 		(src->buffer_count)++;
@@ -75,9 +80,6 @@ uint8_t read_packet(comm_t *src, comm_t *target, bool passthrough) {
 			flush_packet(src);
 		}
 		
-		if (passthrough)
-			target->serial->write(c);
-
 		// try to grab message, decode if complete
 		if(mavlink_parse_char(MAVLINK_COMM_0, c, &(src->msg), &(src->status))) {
 			src->has_message = true;

@@ -1,12 +1,17 @@
 // utility methods
 
-// bit juggling
+/**
+ * get a bit from one byte
+ */
 boolean getBit(byte Reg, byte whichBit) {
 	boolean State;
 	State = Reg & (1 << whichBit);
 	return State;
 }
 
+/**
+ * set a bit in a byte
+ */
 byte setBit(byte &Reg, byte whichBit, boolean stat) {
 	if (stat)
 		Reg = Reg | (1 << whichBit);

@@ -20,7 +20,7 @@ typedef struct comm_t {
 	mavlink_status_t status;
 	bool has_message;
 	uint8_t chan;
-	uint32_t rx;
-	uint32_t tx;
+	//uint32_t rx;
+	//uint32_t tx;
 };
 

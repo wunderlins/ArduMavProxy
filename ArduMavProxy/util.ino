@@ -41,7 +41,7 @@ void route_packet(comm_t *src, comm_t *target) {
 	for (i=0; i < src->buffer_count; i++) {
 		target->serial->write(src->buffer[i]);
 	}
-	src->tx += i;
+	//src->tx += i;
 	//flush_packet(src);
 }
 
@@ -65,13 +65,13 @@ uint8_t read_packet(comm_t *src, comm_t *target, bool passthrough) {
 	while(src->serial->available() > 0) { 
 		
 		char c = src->serial->read();
-		(src->rx)++;
+		//(src->rx)++;
 		
 		// fast passthough for low latency. If you use this you cant modify 
 		// packages before sending. this is for packet sniffing only.
 		if (passthrough) {
 			target->serial->write(c);
-			(src->tx)++;
+			//(src->tx)++;
 		}
 
 		// buffer the received character

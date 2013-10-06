@@ -12,9 +12,9 @@ static mavlink_status_t status2;
 static mavlink_status_t status3;
 
 // Serial devices
-static comm_t s_src     = {"", 0, &Serial1, msg1, status1, 0, 1, 0, 0};
-static comm_t s_modem   = {"", 0, &Serial2, msg2, status2, 0, 2, 0, 0};
-static comm_t s_ext = {"", 0, &Serial,  msg3, status3, 0, 3, 0, 0};
+static comm_t s_src     = {"", 0, &Serial1, msg1, status1, 0, 1 /*, 0, 0*/};
+static comm_t s_modem   = {"", 0, &Serial2, msg2, status2, 0, 2 /*, 0, 0*/};
+static comm_t s_ext = {"", 0, &Serial,  msg3, status3, 0, 3 /*, 0, 0 */};
 
 /**
  * User setup hook
@@ -120,7 +120,7 @@ void loop() {
 	passthrough = false;
 	uint8_t ret1 = read_packet(&s_src, &s_modem, passthrough);
 	
-	if (s_src.has_message) { // we got a complete message from the source
+	if (ret1) { // we got a complete message from the source
 		
 		on_serial1(&s_src);
 		
@@ -134,7 +134,7 @@ void loop() {
 	// read mavlink package from modem
 	passthrough = false;
 	uint8_t ret2 = read_packet(&s_modem, &s_src, passthrough);
-	if (s_modem.has_message) { // we got a complete message from the source
+	if (ret2) { // we got a complete message from the source
 		// TODO: implement fast passthrough for 2 channels
 		on_serial2(&s_modem);
 		
@@ -151,7 +151,7 @@ void loop() {
 	// No passthrough to modem so we queue src packages
 	passthrough = false;
 	uint8_t ret3 = read_packet(&s_ext, &s_modem, passthrough);
-	if (s_ext.has_message) { // we got a complete message from the source
+	if (ret3) { // we got a complete message from the source
 		
 		on_serial(&s_ext);
 		

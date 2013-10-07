@@ -1,7 +1,7 @@
 #include <GCS_MAVLink.h>
 #include "ArduMavProxy.h"
 
-// #define DBG
+#define DBG
 
 // message structs
 static mavlink_message_t msg1;
@@ -65,19 +65,19 @@ void on_serial1(comm_t *message) {
 	
 	if (message->msg.msgid == MAVLINK_MSG_ID_MISSION_CURRENT) {
 		mission_current = (uint8_t) mavlink_msg_mission_current_get_seq(&(s_src.msg));
-		/*
+		
 		Serial.print("WP no: ");
-		Serial.print(mission_current);
-		Serial.print(" num pkg: ");
-		Serial.print(num_packets);
-		Serial.print(" rx: ");
-		Serial.print(message->rx);
-		Serial.print(" tx: ");
-		Serial.print(message->tx);
-		Serial.print(" droped: ");
-		int32_t dropped = message->rx - message->tx;
-		Serial.println(dropped);
-		*/
+		Serial.println(mission_current);
+//		Serial.print(" num pkg: ");
+//		Serial.print(num_packets);
+//		Serial.print(" rx: ");
+//		Serial.print(message->rx);
+//		Serial.print(" tx: ");
+//		Serial.print(message->tx);
+//		Serial.print(" droped: ");
+//		int32_t dropped = message->rx - message->tx;
+//		Serial.println(dropped);
+		
 	}
 	
 }
@@ -91,8 +91,15 @@ void on_serial1(comm_t *message) {
  * serial link.
  */
 void on_serial2(comm_t *message) {
-	// do something useful
-	;
+	#ifdef DBG
+        Serial.println(message->msg.msgid);
+        /*
+  	if (message->msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
+		base_mode = mavlink_msg_heartbeat_get_base_mode(&(s_src.msg));
+                Serial.println(base_mode);
+        }
+        */
+        #endif
 }
 
 /**

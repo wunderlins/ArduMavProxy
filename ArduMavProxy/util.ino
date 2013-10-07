@@ -41,6 +41,10 @@ void route_packet(comm_t *src, comm_t *target) {
 	for (i=0; i < src->buffer_count; i++) {
 		target->serial->write(src->buffer[i]);
 	}
+	// TODO: check if this helps with more than one source,
+	//       http://www.pjrc.com/teensy/td_serial.html
+	target->serial->write->flush();
+	
 	//src->tx += i;
 	//flush_packet(src);
 }

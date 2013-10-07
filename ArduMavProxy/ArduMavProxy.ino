@@ -14,7 +14,7 @@ static mavlink_status_t status3;
 // Serial devices
 static comm_t s_src     = {"", 0, &Serial1, msg1, status1, 0, 1 /*, 0, 0*/};
 static comm_t s_modem   = {"", 0, &Serial2, msg2, status2, 0, 2 /*, 0, 0*/};
-static comm_t s_ext = {"", 0, &Serial,  msg3, status3, 0, 3 /*, 0, 0 */};
+static comm_t s_ext     = {"", 0, &Serial,  msg3, status3, 0, 3 /*, 0, 0 */};
 
 /**
  * User setup hook
@@ -91,7 +91,8 @@ void on_serial1(comm_t *message) {
  * serial link.
  */
 void on_serial2(comm_t *message) {
-	// do something usefull
+	// do something useful
+	;
 }
 
 /**
@@ -103,7 +104,8 @@ void on_serial2(comm_t *message) {
  * serial link.
  */
 void on_serial(comm_t *message) {
-	// do something usefull
+	// do something useful
+	;
 }
 
 void setup() {

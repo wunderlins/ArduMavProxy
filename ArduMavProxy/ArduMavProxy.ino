@@ -3,6 +3,10 @@
 
 #define DBG
 
+#ifdef DBG
+#include "message_types.h"
+#endif
+
 // message structs
 static mavlink_message_t msg1;
 static mavlink_message_t msg2;
@@ -44,6 +48,20 @@ uint8_t base_mode, motor_armed, mode_auto, mission_current = 0;
 //static uint32_t num_packets = 0;
 void on_serial1(comm_t *message) {
 	
+	#ifdef DBG
+	Serial.print("1: ");
+	Serial.print(message->msg.msgid);
+	Serial.print(" ");
+	Serial.println(msgtypes[message->msg.msgid]);
+	/*
+	if (message->msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
+		base_mode = mavlink_msg_heartbeat_get_base_mode(&(s_src.msg));
+		Serial.println(base_mode);
+	}
+	*/
+	#endif
+
+
 	if (message->msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
 		base_mode = mavlink_msg_heartbeat_get_base_mode(&(s_src.msg));
 	
@@ -66,8 +84,8 @@ void on_serial1(comm_t *message) {
 	if (message->msg.msgid == MAVLINK_MSG_ID_MISSION_CURRENT) {
 		mission_current = (uint8_t) mavlink_msg_mission_current_get_seq(&(s_src.msg));
 		
-		Serial.print("WP no: ");
-		Serial.println(mission_current);
+//		Serial.print("WP no: ");
+//		Serial.println(mission_current);
 //		Serial.print(" num pkg: ");
 //		Serial.print(num_packets);
 //		Serial.print(" rx: ");
@@ -92,14 +110,17 @@ void on_serial1(comm_t *message) {
  */
 void on_serial2(comm_t *message) {
 	#ifdef DBG
-        Serial.println(message->msg.msgid);
-        /*
-  	if (message->msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
+	Serial.print("2: ");
+	Serial.print(message->msg.msgid);
+	Serial.print(" ");
+	Serial.println(msgtypes[message->msg.msgid]);
+	/*
+	if (message->msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
 		base_mode = mavlink_msg_heartbeat_get_base_mode(&(s_src.msg));
-                Serial.println(base_mode);
-        }
-        */
-        #endif
+		Serial.println(base_mode);
+	}
+	*/
+	#endif
 }
 
 /**
@@ -117,7 +138,7 @@ void on_serial(comm_t *message) {
 
 void setup() {
  	Serial.begin(115200);
- 	Serial1.begin(115200);
+ 	Serial1.begin(57600);
  	Serial2.begin(TELEMETRY_SPEED); // FIXME: s_modem.serial->begin() doesn't work
  	
  	on_setup();

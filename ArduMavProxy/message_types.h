@@ -1,4 +1,4 @@
-char *msgtypes = {
+char *msgtypes[] = {
 "HEARTBEAT", 
 "SYS_STATUS", 
 "SYSTEM_TIME", 
@@ -162,12 +162,12 @@ char *msgtypes = {
 "", 
 "", 
 "", 
-"", 
-"", 
-"", 
-"", 
-"", 
-"", 
+"AHRS", 
+"SIMSTATE", 
+"HWSTATUS", 
+"RADIO", 
+"LIMITS_STATUS", 
+"WIND", 
 "", 
 "", 
 "", 
@@ -254,5 +254,5 @@ char *msgtypes = {
 "NAMED_VALUE_INT", 
 "STATUSTEXT", 
 "DEBUG", 
-"", 
+""
 };

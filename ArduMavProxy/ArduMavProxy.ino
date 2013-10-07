@@ -109,8 +109,8 @@ void on_serial(comm_t *message) {
 }
 
 void setup() {
- 	Serial.begin(TELEMETRY_SPEED);
- 	Serial1.begin(TELEMETRY_SPEED);
+ 	Serial.begin(115200);
+ 	Serial1.begin(115200);
  	Serial2.begin(TELEMETRY_SPEED); // FIXME: s_modem.serial->begin() doesn't work
  	
  	on_setup();

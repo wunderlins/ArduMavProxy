@@ -43,7 +43,7 @@ void route_packet(comm_t *src, comm_t *target) {
 	}
 	// TODO: check if this helps with more than one source,
 	//       http://www.pjrc.com/teensy/td_serial.html
-	target->serial->write->flush();
+	target->serial->flush();
 	
 	//src->tx += i;
 	//flush_packet(src);

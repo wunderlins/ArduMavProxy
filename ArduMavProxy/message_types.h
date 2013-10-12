@@ -1,6 +1,4 @@
-char *msgtypes[] = {
-"HEARTBEAT", 
-"SYS_STATUS", 
+char *msgtypes[] = { "HEARTBEAT", "SYS_STATUS", 
 "SYSTEM_TIME", 
 "", 
 "PING", 

@@ -1,7 +1,7 @@
 #include <GCS_MAVLink.h>
 #include "ArduMavProxy.h"
 
-#define DBG
+// #define DBG
 
 #ifdef DBG
 #include "message_types.h"
@@ -96,7 +96,7 @@ void on_serial1(comm_t *message) {
 //		int32_t dropped = message->rx - message->tx;
 //		Serial.println(dropped);
 		
-	}
+	} 
 	
 }
 
@@ -147,9 +147,10 @@ void setup() {
 void loop() {
 	
 	// No passthrough to modem so we queue src packages
-	passthrough = false;
+	passthrough = true;
 	uint8_t ret1 = read_packet(&s_src, &s_modem, passthrough);
 	
+        /*
 	if (ret1) { // we got a complete message from the source
 		
 		on_serial1(&s_src);
@@ -160,10 +161,13 @@ void loop() {
 			flush_packet(&s_src);
 		}
 	}
+        */
 	
 	// read mavlink package from modem
-	passthrough = false;
+	//passthrough = false;
 	uint8_t ret2 = read_packet(&s_modem, &s_src, passthrough);
+
+        /*
 	if (ret2) { // we got a complete message from the source
 		// TODO: implement fast passthrough for 2 channels
 		on_serial2(&s_modem);
@@ -180,7 +184,10 @@ void loop() {
 	#ifndef DBG
 	// No passthrough to modem so we queue src packages
 	passthrough = false;
+        */
 	uint8_t ret3 = read_packet(&s_ext, &s_modem, passthrough);
+
+        /*
 	if (ret3) { // we got a complete message from the source
 		
 		on_serial(&s_ext);
@@ -191,5 +198,6 @@ void loop() {
 		}
 	}
 	#endif
+        */
 }
 

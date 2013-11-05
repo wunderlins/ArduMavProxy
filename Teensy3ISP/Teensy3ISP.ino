@@ -300,7 +300,7 @@ void start_pmode() {
   delay(50);
   pinMode(MISO, INPUT);
   pinMode(MOSI, OUTPUT);
-	spi_init();  
+	spi_init(); // moved down here for teensy 3
 	spi_transaction(0xAC, 0x53, 0x00, 0x00);
   pmode = 1;
 }

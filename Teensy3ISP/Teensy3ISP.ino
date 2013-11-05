@@ -31,7 +31,7 @@
 //
 // code changes: http://forum.pjrc.com/threads/23574-Teensy-3-as-AVR-ISP-programmer
 // 
-// NOTE: use 10K resistor on teensy between RST and GND 
+// NOTE: use 10K resistor on teensy between RST and GND. Connect 3V to AVR.
 // 
 
 
@@ -290,7 +290,6 @@ void set_parameters() {
 }
 
 void start_pmode() {
-  spi_init();
   // following delays may not work on all targets...
   pinMode(RESET, OUTPUT);
   digitalWrite(RESET, HIGH);
@@ -301,7 +300,8 @@ void start_pmode() {
   delay(50);
   pinMode(MISO, INPUT);
   pinMode(MOSI, OUTPUT);
-  spi_transaction(0xAC, 0x53, 0x00, 0x00);
+	spi_init();  
+	spi_transaction(0xAC, 0x53, 0x00, 0x00);
   pmode = 1;
 }
 

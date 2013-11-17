@@ -164,10 +164,10 @@ void loop() {
         */
 	
 	// read mavlink package from modem
-	//passthrough = false;
+	passthrough = false;
 	uint8_t ret2 = read_packet(&s_modem, &s_src, passthrough);
 
-        /*
+        
 	if (ret2) { // we got a complete message from the source
 		// TODO: implement fast passthrough for 2 channels
 		on_serial2(&s_modem);
@@ -181,13 +181,12 @@ void loop() {
 		}
 	}
 	
+        
 	#ifndef DBG
 	// No passthrough to modem so we queue src packages
 	passthrough = false;
-        */
 	uint8_t ret3 = read_packet(&s_ext, &s_modem, passthrough);
 
-        /*
 	if (ret3) { // we got a complete message from the source
 		
 		on_serial(&s_ext);
@@ -198,6 +197,5 @@ void loop() {
 		}
 	}
 	#endif
-        */
 }
 

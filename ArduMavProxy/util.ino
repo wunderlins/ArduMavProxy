@@ -76,6 +76,7 @@ uint8_t read_packet(comm_t *src, comm_t *target, bool passthrough) {
 		if (passthrough) {
 			target->serial->write(c);
 			//(src->tx)++;
+			// FIXME: might add a break here while in passthrough?
 		}
 
 		// buffer the received character
